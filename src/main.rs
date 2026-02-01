@@ -1,3 +1,6 @@
 fn main() {
-    println!("Hello, world!");
+    let title_screen_art = r"___  __  ___  __      __   ___       ___  __       ___  __   __
+ |  /  \  |  |__)    / _` |__  |\ | |__  |__)  /\   |  /  \ |__)
+ |  \__/  |  |       \__> |___ | \| |___ |  \ /~~\  |  \__/ |  \ ";
+    println!("{}", title_screen_art);
 }
