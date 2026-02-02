@@ -1,4 +1,5 @@
-use std::io;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::{io, thread};
 use totp_rs::{Algorithm, Secret, TOTP};
 
 fn main() {
@@ -7,6 +8,10 @@ fn main() {
  |  \__/  |  |       \__> |___ | \| |___ |  \ /~~\  |  \__/ |  \ ";
     println!("{}", title_screen_art);
 
+    println!(
+        "Warning: This program clears your terminal after you enter the key, please ensure you have no information you may need later in this terminal session"
+    );
+    println!("To abort use CTRL+C");
     println!("Enter your secret (Base32 - Only include A-Z & 2-7):");
     let mut secret_str = String::new();
 
@@ -21,6 +26,26 @@ fn main() {
 
     let totp = TOTP::new(Algorithm::SHA1, 6, 1, 30, secret).unwrap();
 
-    let token = totp.generate_current().unwrap();
-    println!("Current token: {}", token);
+    let mut i: u8 = 30;
+
+    loop {
+        let token = totp.generate_current().unwrap();
+        clearscreen::clear().expect("failed to clear screen");
+        println!("{}", title_screen_art);
+        println!(
+            "Current token: {} - {} seconds",
+            token,
+            30 - (SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_secs()
+                % 30)
+        );
+        thread::sleep(Duration::from_secs(1));
+        if i > 0 {
+            i -= 1;
+        } else {
+            i = 30
+        }
+    }
 }
