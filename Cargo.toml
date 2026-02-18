@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 totp-rs = { version = "5.7.0"}
 clearscreen = "4.0.3"
+dotenv = "0.15.0"
