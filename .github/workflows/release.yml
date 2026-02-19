@@ -1,4 +1,4 @@
-name: Release CloudCat
+name: Release TOTP-Generator
 
 permissions:
   contents: write
@@ -61,41 +61,39 @@ jobs:
         if: env.SHOULD_RELEASE == 'true'
         run: |
           cargo build --release --target x86_64-apple-darwin
-          cp -r assets target/x86_64-apple-darwin/release/
 
       - name: Build macOS ARM64
         if: env.SHOULD_RELEASE == 'true'
         run: |
           cargo build --release --target aarch64-apple-darwin
-          cp -r assets target/aarch64-apple-darwin/release/
 
       - name: Archive macOS x86_64 binary
         if: env.SHOULD_RELEASE == 'true'
         run: |
           cd target/x86_64-apple-darwin/release
-          zip -r cloudcat-macos-x86_64.zip cloudcat assets
-          mv cloudcat-macos-x86_64.zip ../../../
+          zip -r totp-generator-macos-x86_64.zip totp-generator 
+          mv totp-generator-macos-x86_64.zip ../../../
 
       - name: Archive macOS ARM64 binary
         if: env.SHOULD_RELEASE == 'true'
         run: |
           cd target/aarch64-apple-darwin/release
-          zip -r cloudcat-macos-arm64.zip cloudcat assets
-          mv cloudcat-macos-arm64.zip ../../../
+          zip -r totp-generator-macos-arm64.zip totp-generator 
+          mv totp-generator-macos-arm64.zip ../../../
 
       - name: Upload macOS x86_64 zip
         if: env.SHOULD_RELEASE == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: cloudcat-macos-x86_64
-          path: cloudcat-macos-x86_64.zip
+          name: totp-generator-macos-x86_64
+          path: totp-generator-macos-x86_64.zip
 
       - name: Upload macOS ARM64 zip
         if: env.SHOULD_RELEASE == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: cloudcat-macos-arm64
-          path: cloudcat-macos-arm64.zip
+          name: totp-generator-macos-arm64
+          path: totp-generator-macos-arm64.zip
 
   build-linux-windows:
     runs-on: ubuntu-latest
@@ -153,42 +151,40 @@ jobs:
         if: env.SHOULD_RELEASE == 'true'
         run: |
           cargo build --release --target x86_64-unknown-linux-musl
-          cp -r assets target/x86_64-unknown-linux-musl/release/
 
       - name: Build Windows x86_64
         if: env.SHOULD_RELEASE == 'true'
         run: |
           sudo apt-get update && sudo apt-get install -y mingw-w64
           cargo build --release --target x86_64-pc-windows-gnu
-          cp -r assets target/x86_64-pc-windows-gnu/release/
 
       - name: Zip Linux binary
         if: env.SHOULD_RELEASE == 'true'
         run: |
           cd target/x86_64-unknown-linux-musl/release
-          zip -r cloudcat-linux-x86_64.zip cloudcat assets
-          mv cloudcat-linux-x86_64.zip ../../../
+          zip -r totp-generator-linux-x86_64.zip totp-generator 
+          mv totp-generator-linux-x86_64.zip ../../../
 
       - name: Zip Windows binary
         if: env.SHOULD_RELEASE == 'true'
         run: |
           cd target/x86_64-pc-windows-gnu/release
-          zip -r cloudcat-windows-x86_64.zip cloudcat.exe assets
-          mv cloudcat-windows-x86_64.zip ../../../
+          zip -r totp-generator-windows-x86_64.zip totp-generator.exe 
+          mv totp-generator-windows-x86_64.zip ../../../
 
       - name: Upload Linux zip
         if: env.SHOULD_RELEASE == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: cloudcat-linux-x86_64
-          path: cloudcat-linux-x86_64.zip
+          name: totp-generator-linux-x86_64
+          path: totp-generator-linux-x86_64.zip
 
       - name: Upload Windows zip
         if: env.SHOULD_RELEASE == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: cloudcat-windows-x86_64
-          path: cloudcat-windows-x86_64.zip
+          name: totp-generator-windows-x86_64
+          path: totp-generator-windows-x86_64.zip
 
   release:
     runs-on: ubuntu-latest
@@ -241,9 +237,9 @@ jobs:
           gh release create "$NEW_TAG" \
             --title "Release $NEW_TAG" \
             --notes-file release-notes.md \
-            cloudcat-linux-x86_64.zip \
-            cloudcat-windows-x86_64.zip \
-            cloudcat-macos-x86_64.zip \
-            cloudcat-macos-arm64.zip
+            totp-generator-linux-x86_64.zip \
+            totp-generator-windows-x86_64.zip \
+            totp-generator-macos-x86_64.zip \
+            totp-generator-macos-arm64.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
