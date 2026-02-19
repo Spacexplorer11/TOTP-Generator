@@ -1,0 +1,256 @@
+name: Release TOTP-Generator
+
+permissions:
+  contents: write
+  models: read
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.85.0
+
+      - name: Check Cargo version bump (macOS)
+        id: version
+        run: |
+          set -e
+          CARGO_VERSION=$(grep -m1 '^version\s*=\s*"' Cargo.toml | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/')
+          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n1 || true)
+          SHOULD_RELEASE=false
+          if [ -z "$LATEST_TAG" ]; then
+            SHOULD_RELEASE=true
+          else
+            LATEST_VER=${LATEST_TAG#v}
+            if [ "v$CARGO_VERSION" = "$LATEST_TAG" ]; then
+              SHOULD_RELEASE=false
+            else
+              top=$(printf '%s\n' "$LATEST_VER" "$CARGO_VERSION" | sort -V | tail -n1)
+              if [ "$top" = "$CARGO_VERSION" ]; then
+                SHOULD_RELEASE=true
+              fi
+            fi
+          fi
+          echo "CARGO_VERSION=$CARGO_VERSION" >> $GITHUB_ENV
+          echo "LATEST_TAG=${LATEST_TAG:-}" >> $GITHUB_ENV
+          echo "NEW_TAG=v$CARGO_VERSION" >> $GITHUB_ENV
+          echo "SHOULD_RELEASE=$SHOULD_RELEASE" >> $GITHUB_ENV
+
+      - name: Run tests
+        if: env.SHOULD_RELEASE == 'true'
+        run: cargo test --all --locked
+
+      - name: Install required Rust targets (macOS)
+        if: env.SHOULD_RELEASE == 'true'
+        run: |
+          rustup target add x86_64-apple-darwin
+          rustup target add aarch64-apple-darwin
+
+      - name: Build macOS x86_64
+        if: env.SHOULD_RELEASE == 'true'
+        run: |
+          cargo build --release --target x86_64-apple-darwin
+
+      - name: Build macOS ARM64
+        if: env.SHOULD_RELEASE == 'true'
+        run: |
+          cargo build --release --target aarch64-apple-darwin
+
+      - name: Archive macOS x86_64 binary
+        if: env.SHOULD_RELEASE == 'true'
+        run: |
+          cd target/x86_64-apple-darwin/release
+          zip -r totp-generator-macos-x86_64.zip TOTP-Generator
+          mv totp-generator-macos-x86_64.zip ../../../
+
+      - name: Archive macOS ARM64 binary
+        if: env.SHOULD_RELEASE == 'true'
+        run: |
+          cd target/aarch64-apple-darwin/release
+          zip -r totp-generator-macos-arm64.zip TOTP-Generator
+          mv totp-generator-macos-arm64.zip ../../../
+
+      - name: Upload macOS x86_64 zip
+        if: env.SHOULD_RELEASE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: totp-generator-macos-x86_64
+          path: totp-generator-macos-x86_64.zip
+
+      - name: Upload macOS ARM64 zip
+        if: env.SHOULD_RELEASE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: totp-generator-macos-arm64
+          path: totp-generator-macos-arm64.zip
+
+  build-linux-windows:
+    runs-on: ubuntu-latest
+    outputs:
+      new-tag: ${{ steps.version.outputs.NEW_TAG }}
+      should-release: ${{ steps.version.outputs.SHOULD_RELEASE }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: 1.85.0
+          override: true
+
+      - name: Check Cargo version bump (Linux/Windows)
+        id: version
+        run: |
+          set -e
+          CARGO_VERSION=$(grep -m1 '^version\s*=\s*"' Cargo.toml | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/')
+          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n1 || true)
+          SHOULD_RELEASE=false
+          if [ -z "$LATEST_TAG" ]; then
+            SHOULD_RELEASE=true
+          else
+            LATEST_VER=${LATEST_TAG#v}
+            if [ "v$CARGO_VERSION" = "$LATEST_TAG" ]; then
+              SHOULD_RELEASE=false
+            else
+              top=$(printf '%s\n' "$LATEST_VER" "$CARGO_VERSION" | sort -V | tail -n1)
+              if [ "$top" = "$CARGO_VERSION" ]; then
+                SHOULD_RELEASE=true
+              fi
+            fi
+          fi
+          echo "CARGO_VERSION=$CARGO_VERSION" >> $GITHUB_ENV
+          echo "LATEST_TAG=${LATEST_TAG:-}" >> $GITHUB_ENV
+          echo "NEW_TAG=v$CARGO_VERSION" >> $GITHUB_ENV
+          echo "SHOULD_RELEASE=$SHOULD_RELEASE" >> $GITHUB_ENV
+          echo "NEW_TAG=v$CARGO_VERSION" >> $GITHUB_OUTPUT
+          echo "SHOULD_RELEASE=$SHOULD_RELEASE" >> $GITHUB_OUTPUT
+
+      - name: Run tests
+        if: env.SHOULD_RELEASE == 'true'
+        run: cargo test --all --locked
+
+      - name: Install required Rust targets (Linux and Windows)
+        if: env.SHOULD_RELEASE == 'true'
+        run: |
+          rustup target add x86_64-unknown-linux-musl
+          rustup target add x86_64-pc-windows-gnu
+
+      - name: Install cross-compilation tools
+        if: env.SHOULD_RELEASE == 'true'
+        run: |
+           sudo apt-get update && sudo apt-get install -y musl-tools mingw-w64
+  
+
+      - name: Build Linux binary
+        if: env.SHOULD_RELEASE == 'true'
+        run: |
+          cargo build --release --target x86_64-unknown-linux-musl
+
+      - name: Build Windows x86_64
+        if: env.SHOULD_RELEASE == 'true'
+        run: |
+          cargo build --release --target x86_64-pc-windows-gnu
+
+      - name: Zip Linux binary
+        if: env.SHOULD_RELEASE == 'true'
+        run: |
+          cd target/x86_64-unknown-linux-musl/release
+          zip -r totp-generator-linux-x86_64.zip TOTP-Generator 
+          mv totp-generator-linux-x86_64.zip ../../../
+
+      - name: Zip Windows binary
+        if: env.SHOULD_RELEASE == 'true'
+        run: |
+          cd target/x86_64-pc-windows-gnu/release
+          zip -r totp-generator-windows-x86_64.zip TOTP-Generator.exe 
+          mv totp-generator-windows-x86_64.zip ../../../
+
+      - name: Upload Linux zip
+        if: env.SHOULD_RELEASE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: totp-generator-linux-x86_64
+          path: totp-generator-linux-x86_64.zip
+
+      - name: Upload Windows zip
+        if: env.SHOULD_RELEASE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: totp-generator-windows-x86_64
+          path: totp-generator-windows-x86_64.zip
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [build-macos, build-linux-windows]
+    if: needs.build-linux-windows.outputs.should-release == 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Needed to retrieve tags and git history for changelog
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - name: Install gh-models extension
+        run: gh extension install https://github.com/github/gh-models
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate release notes with GitHub Models
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Fetching commits..."
+          
+          # Evaluate LATEST_TAG locally since environment variables do not carry over between jobs
+          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n1 || true)
+
+          if [ -n "$LATEST_TAG" ]; then
+            COMMITS=$(git log "$LATEST_TAG"..HEAD --pretty=format:"- %s")
+          else
+            COMMITS=$(git log --pretty=format:"- %s")
+          fi
+
+          # Pipe commits directly into the gh model prompt
+          echo "$COMMITS" | gh models run openai/gpt-5-nano \
+            "Summarise the following commit messages into a clear, user-friendly changelog in markdown. Group related changes together under headings if possible (e.g. Features, Fixes, Improvements). Write in concise past tense or imperative style (e.g. 'Fixed crash when...', 'Add support for...'). Do not include any extra text outside the changelog itself." > release-notes.md
+
+          # Fallback in case the model call fails
+           if [ ! -s release-notes.md ]; then
+             echo "# Changelog" > release-notes.md
+             echo "" >> release-notes.md
+             echo "$COMMITS" >> release-notes.md
+           fi
+
+      - name: Push new tag
+        run: |
+          NEW_TAG="${{ needs.build-linux-windows.outputs.new-tag }}"
+          git tag $NEW_TAG
+          git push origin $NEW_TAG
+
+      - name: Create GitHub Release with gh CLI
+        run: |
+          NEW_TAG="${{ needs.build-linux-windows.outputs.new-tag }}"
+          echo "Creating release $NEW_TAG..."
+          gh release create "$NEW_TAG" \
+            --title "Release $NEW_TAG" \
+            --notes-file release-notes.md \
+            totp-generator-linux-x86_64.zip \
+            totp-generator-windows-x86_64.zip \
+            totp-generator-macos-x86_64.zip \
+            totp-generator-macos-arm64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
