@@ -7,6 +7,8 @@ This is a CLI tool which allows you to securely generate Time-Based One-time Pas
 ## How to use?
 1. Download the binary for your OS from the [latest release](https://github.com/Spacexplorer11/TOTP-Generator/releases/latest).
 2. Run the binary and input your secret!
+>[!Important]
+>Your secret must be at least 128 bits (in Base32 thats ~26 characters)
 
 ### Want to use multiple secrets?
 If you want to use multiple secrets, you must set them as environment variables.  
