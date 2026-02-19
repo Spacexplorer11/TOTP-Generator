@@ -14,12 +14,14 @@ fn main() {
     } else {
         dotenv().ok();
     }
-
     println!(
-        "Warning: This program clears your terminal after you enter the key, please ensure you have no information you may need later in this terminal session"
+        "If you wish to use multiple tokens, please read the README here: https://github.com/Spacexplorer11/TOTP-Generator/blob/main/README.md"
     );
-    println!("To abort use CTRL+C");
-    println!("If you wish to use stored / loaded secrets, please enter 'N' ");
+    println!(
+        "Warning: This program clears your terminal after click enter, please ensure you have no information you may need later in this terminal session"
+    );
+    println!("To abort/quit use CTRL+C");
+    println!("If you wish to only use stored / loaded secrets, please enter 'N'");
     println!("Enter your secret (Base32 - Only include A-Z & 2-7):");
     let mut secret_str = String::new();
 
@@ -28,29 +30,30 @@ fn main() {
         .expect("An error occurred while taking input");
 
     let secret_str = secret_str.trim().replace(" ", "").to_uppercase();
-    let mut secrets: Vec<Vec<u8>> = Vec::new();
+    let mut secrets: Vec<(String, Vec<u8>)> = Vec::new();
     if secret_str.to_lowercase() != "n" {
-        secrets.push(
+        secrets.push((
+            String::from("Untitled"),
             Secret::Encoded(secret_str)
                 .to_bytes()
                 .expect("Your secret was invalid."),
-        );
+        ));
     }
 
     for var in env::vars() {
         let secret = Secret::Encoded(var.1).to_bytes();
         match secret {
-            Ok(secret) => secrets.push(secret),
+            Ok(secret) => secrets.push((var.0, secret)),
             _ => (),
         }
     }
 
-    let mut totps: Vec<TOTP> = Vec::new();
+    let mut totps: Vec<(String, TOTP)> = Vec::new();
 
     for secret in secrets {
-        let totp = TOTP::new(Algorithm::SHA1, 6, 1, 30, secret);
+        let totp = TOTP::new(Algorithm::SHA1, 6, 1, 30, secret.1);
         match totp {
-            Ok(totp) => totps.push(totp),
+            Ok(totp) => totps.push((secret.0, totp)),
             _ => (),
         };
     }
@@ -62,9 +65,10 @@ fn main() {
         println!("{}", title_screen_art);
         println!("Missing a token? Check your environment variables to see if it was set properly");
         for totp in &totps {
-            let token = totp.generate_current().unwrap();
+            let token = totp.1.generate_current().unwrap();
             println!(
-                "Current token: {} - {} seconds",
+                "{}: {} - {} seconds",
+                totp.0,
                 token,
                 30 - (SystemTime::now()
                     .duration_since(UNIX_EPOCH)
