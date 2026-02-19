@@ -1,4 +1,4 @@
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use std::env;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{io, thread};
@@ -69,8 +69,6 @@ fn main() {
         };
     }
 
-    let mut i: u8 = 30;
-
     if totps.is_empty() {
         println!(
             "No secrets were found/could be used, exiting. Please make sure the env variables begin with 'TOTP_'"
@@ -95,10 +93,5 @@ fn main() {
             );
         }
         thread::sleep(Duration::from_secs(1));
-        if i > 0 {
-            i -= 1;
-        } else {
-            i = 30
-        }
     }
 }
