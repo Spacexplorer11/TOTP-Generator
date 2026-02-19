@@ -15,11 +15,11 @@ You can do this by running the following command for your OS with your data for 
 >[Note]
 > You must include the `TOTP_` at the start of your env variable as otherwise it will be ignored
 
-#### MacOS / Linux:
+#### macOS / Linux:
 `export TOTP_MY_SECRET=MY_SPECIAL_SECRET`
 #### Windows (Command Prompt):
 `set TOTP_MY_SECRET=MY_SPECIAL_SECRET`
-#### Windows (Powershell):
+#### Windows (PowerShell):
 `$env:TOTP_MY_SECRET="MY_SPECIAL_SECRET"`
 After you close the terminal session, your secrets will disappear and you will need to re-set them when you want to use them again
 

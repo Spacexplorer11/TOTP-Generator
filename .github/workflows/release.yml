@@ -70,14 +70,14 @@ jobs:
         if: env.SHOULD_RELEASE == 'true'
         run: |
           cd target/x86_64-apple-darwin/release
-          zip -r totp-generator-macos-x86_64.zip totp-generator 
+          zip -r totp-generator-macos-x86_64.zip TOTP-Generator
           mv totp-generator-macos-x86_64.zip ../../../
 
       - name: Archive macOS ARM64 binary
         if: env.SHOULD_RELEASE == 'true'
         run: |
           cd target/aarch64-apple-darwin/release
-          zip -r totp-generator-macos-arm64.zip totp-generator 
+          zip -r totp-generator-macos-arm64.zip TOTP-Generator
           mv totp-generator-macos-arm64.zip ../../../
 
       - name: Upload macOS x86_64 zip

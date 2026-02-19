@@ -18,7 +18,7 @@ fn main() {
         "If you wish to use multiple tokens, please read the README here: https://github.com/Spacexplorer11/TOTP-Generator/blob/main/README.md"
     );
     println!(
-        "Warning: This program clears your terminal after you click enter, please ensure you have no information you may need later in this terminal session"
+        "Warning: This program clears your terminal after you press Enter. Please ensure you have no information you may need later in this terminal session."
     );
     println!("To abort/quit use CTRL+C");
     println!("If you wish to only use stored / loaded secrets, please enter 'N'");
@@ -44,12 +44,18 @@ fn main() {
         if !var.0.starts_with("TOTP_") {
             continue;
         };
-        let secret = Secret::Encoded(var.1).to_bytes();
+        let env_secret = var.1.trim().replace(" ", "").to_uppercase();
+        let secret = Secret::Encoded(env_secret).to_bytes();
         match secret {
             Ok(secret) => {
                 secrets.push((String::from(var.0.strip_prefix("TOTP_").unwrap()), secret))
             }
-            _ => (),
+            Err(e) => {
+                eprintln!(
+                    "Warning: environment variable '{}' was ignored because it does not contain a valid TOTP secret: {:?}",
+                    var.0, e
+                );
+            }
         }
     }
 
