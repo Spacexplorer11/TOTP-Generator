@@ -146,6 +146,12 @@ jobs:
           rustup target add x86_64-unknown-linux-musl
           rustup target add x86_64-pc-windows-gnu
 
+      - name: Install cross-compilation tools
+        if: env.SHOULD_RELEASE == 'true'
+        run: |
+           sudo apt-get update && sudo apt-get install -y musl-tools mingw-w64
+  
+
       - name: Build Linux binary
         if: env.SHOULD_RELEASE == 'true'
         run: |
@@ -154,7 +160,6 @@ jobs:
       - name: Build Windows x86_64
         if: env.SHOULD_RELEASE == 'true'
         run: |
-          sudo apt-get update && sudo apt-get install -y mingw-w64 musl-tools
           cargo build --release --target x86_64-pc-windows-gnu
 
       - name: Zip Linux binary

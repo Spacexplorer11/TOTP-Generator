@@ -31,7 +31,7 @@ fn main() {
 
     let secret_str = secret_str.trim().replace(" ", "").to_uppercase();
     let mut secrets: Vec<(String, Vec<u8>)> = Vec::new();
-    if secret_str.eq_ignore_ascii_case("n") {
+    if !secret_str.eq_ignore_ascii_case("n") {
         secrets.push((
             String::from("Untitled"),
             Secret::Encoded(secret_str)
@@ -65,7 +65,7 @@ fn main() {
         let totp = TOTP::new(Algorithm::SHA1, 6, 1, 30, secret.1);
         match totp {
             Ok(totp) => totps.push((secret.0, totp)),
-            _ => (),
+            Err(e) => eprintln!("Warning: secret '{}' could not be used: {:?}", secret.0, e),
         };
     }
 
