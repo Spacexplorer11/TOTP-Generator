@@ -24,9 +24,13 @@ You can do this by running the following command for your OS with your data for 
 After you close the terminal session, your secrets will disappear and you will need to re-set them when you want to use them again
 
 >[!Tip]
-> Want your secrets to persist across terminal sessions? 
+> Want your secrets to persist across terminal sessions?
 > Make a .env file in the same directory you downloaded TOTP-Generator and put all your secrets in there, like this!
 > `TOTP_MY_SECRET=MY_SPECIAL_SECRET`
+>
+> **Security Warning:** The .env file stores TOTP secrets in **plaintext** (unencrypted). To protect your secrets:
+> - Restrict file permissions: `chmod 600 .env` (macOS/Linux) or right-click → Properties → Security tab (Windows)
+> - Never commit .env to version control (already in .gitignore)
 
 
 ## Local development
