@@ -44,7 +44,8 @@ fn main() {
         if !var.0.starts_with("TOTP_") {
             continue;
         };
-        let secret = Secret::Encoded(var.1).to_bytes();
+        let env_secret = var.1.trim().replace(" ", "").to_uppercase();
+        let secret = Secret::Encoded(env_secret).to_bytes();
         match secret {
             Ok(secret) => {
                 secrets.push((String::from(var.0.strip_prefix("TOTP_").unwrap()), secret))
