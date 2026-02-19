@@ -65,7 +65,7 @@ fn main() {
         let totp = TOTP::new(Algorithm::SHA1, 6, 1, 30, secret.1);
         match totp {
             Ok(totp) => totps.push((secret.0, totp)),
-            Err(e) => eprintln!("Warning: secret '{}' could not be used: {:?}", secret.0, e),
+            Err(_) => eprintln!("Warning: secret '{}' could not be used.", secret.0),
         };
     }
 
