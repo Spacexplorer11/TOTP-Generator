@@ -18,7 +18,7 @@ fn main() {
         "If you wish to use multiple tokens, please read the README here: https://github.com/Spacexplorer11/TOTP-Generator/blob/main/README.md"
     );
     println!(
-        "Warning: This program clears your terminal after you click enter, please ensure you have no information you may need later in this terminal session"
+        "Warning: This program clears your terminal after you press Enter. Please ensure you have no information you may need later in this terminal session."
     );
     println!("To abort/quit use CTRL+C");
     println!("If you wish to only use stored / loaded secrets, please enter 'N'");
