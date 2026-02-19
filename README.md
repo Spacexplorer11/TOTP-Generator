@@ -12,7 +12,7 @@ This is a CLI tool which allows you to securely generate Time-Based One-time Pas
 If you want to use multiple secrets, you must set them as environment variables.  
 You can do this by running the following command for your OS with your data for however many secrets you want. 
 
->[Note]
+>[!Note]
 > You must include the `TOTP_` at the start of your env variable as otherwise it will be ignored
 
 #### macOS / Linux:
