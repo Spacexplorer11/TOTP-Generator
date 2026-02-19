@@ -50,7 +50,12 @@ fn main() {
             Ok(secret) => {
                 secrets.push((String::from(var.0.strip_prefix("TOTP_").unwrap()), secret))
             }
-            _ => (),
+            Err(e) => {
+                eprintln!(
+                    "Warning: environment variable '{}' was ignored because it does not contain a valid TOTP secret: {:?}",
+                    var.0, e
+                );
+            }
         }
     }
 
