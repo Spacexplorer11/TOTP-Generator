@@ -31,7 +31,7 @@ fn main() {
 
     let secret_str = secret_str.trim().replace(" ", "").to_uppercase();
     let mut secrets: Vec<(String, Vec<u8>)> = Vec::new();
-    if secret_str.to_lowercase() != "n" {
+    if secret_str.eq_ignore_ascii_case("n") {
         secrets.push((
             String::from("Untitled"),
             Secret::Encoded(secret_str)
