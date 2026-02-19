@@ -41,9 +41,14 @@ fn main() {
     }
 
     for var in env::vars() {
+        if !var.0.starts_with("TOTP_") {
+            continue;
+        };
         let secret = Secret::Encoded(var.1).to_bytes();
         match secret {
-            Ok(secret) => secrets.push((var.0, secret)),
+            Ok(secret) => {
+                secrets.push((String::from(var.0.strip_prefix("TOTP_").unwrap()), secret))
+            }
             _ => (),
         }
     }
@@ -60,6 +65,12 @@ fn main() {
 
     let mut i: u8 = 30;
 
+    if totps.is_empty() {
+        println!(
+            "No secrets were found/could be used, exiting. Please make sure the env variables begin with 'TOTP_'"
+        );
+        return;
+    }
     loop {
         clearscreen::clear().expect("failed to clear screen");
         println!("{}", title_screen_art);

@@ -11,18 +11,22 @@ This is a CLI tool which allows you to securely generate Time-Based One-time Pas
 ### Want to use multiple secrets?
 If you want to use multiple secrets, you must set them as environment variables.  
 You can do this by running the following command for your OS with your data for however many secrets you want. 
+
+>[Note]
+> You must include the `TOTP_` at the start of your env variable as otherwise it will be ignored
+
 #### MacOS / Linux:
-`export MY_SECRET=MY_SPECIAL_SECRET`
+`export TOTP_MY_SECRET=MY_SPECIAL_SECRET`
 #### Windows (Command Prompt):
-`set MY_SECRET=MY_SPECIAL_SECRET`
+`set TOTP_MY_SECRET=MY_SPECIAL_SECRET`
 #### Windows (Powershell):
-`$env:MY_SECRET="MY_SPECIAL_SECRET"`
+`$env:TOTP_MY_SECRET="MY_SPECIAL_SECRET"`
 After you close the terminal session, your secrets will disappear and you will need to re-set them when you want to use them again
 
 >[!Tip]
 > Want your secrets to persist across terminal sessions? 
 > Make a .env file in the same directory you downloaded TOTP-Generator and put all your secrets in there, like this!
-> `MY_SECRET=MY_SPECIAL_SECRET`
+> `TOTP_MY_SECRET=MY_SPECIAL_SECRET`
 
 
 ## Local development
