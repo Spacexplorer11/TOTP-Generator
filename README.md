@@ -1,4 +1,7 @@
 # TOTP Generator
+![Hackatime](https://hackatime-badge.hackclub.com/U08D22QNUVD/TOTP-Generator)![GitHub commit activity](https://img.shields.io/github/commit-activity/m/spacexplorer11/TOTP-Generator)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/spacexplorer11/TOTP-Generator/total)
+
 This is a CLI tool which allows you to securely generate Time-Based One-time Passcodes for any purpose you may need!
 
 ## How to use?
