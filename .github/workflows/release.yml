@@ -166,14 +166,14 @@ jobs:
         if: env.SHOULD_RELEASE == 'true'
         run: |
           cd target/x86_64-unknown-linux-musl/release
-          zip -r totp-generator-linux-x86_64.zip totp-generator 
+          zip -r totp-generator-linux-x86_64.zip TOTP-Generator 
           mv totp-generator-linux-x86_64.zip ../../../
 
       - name: Zip Windows binary
         if: env.SHOULD_RELEASE == 'true'
         run: |
           cd target/x86_64-pc-windows-gnu/release
-          zip -r totp-generator-windows-x86_64.zip totp-generator.exe 
+          zip -r totp-generator-windows-x86_64.zip TOTP-Generator.exe 
           mv totp-generator-windows-x86_64.zip ../../../
 
       - name: Upload Linux zip
