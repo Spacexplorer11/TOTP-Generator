@@ -2,7 +2,7 @@ use dotenvy::dotenv;
 use std::env;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{io, thread};
-use totp_rs::{Algorithm, Secret, TOTP};
+use totp_rs::{Algorithm, Secret, TotpUrlError, TOTP};
 
 fn main() {
     let title_screen_art = r"___  __  ___  __      __   ___       ___  __       ___  __   __
@@ -50,7 +50,7 @@ fn main() {
             Ok(secret) => {
                 secrets.push((String::from(var.0.strip_prefix("TOTP_").unwrap()), secret))
             }
-            Err(_e) => {
+            Err(_) => {
                 eprintln!(
                     "Warning: environment variable '{}' was ignored because it does not contain a valid TOTP secret.",
                     var.0
@@ -65,6 +65,9 @@ fn main() {
         let totp = TOTP::new(Algorithm::SHA1, 6, 1, 30, secret.1);
         match totp {
             Ok(totp) => totps.push((secret.0, totp)),
+            Err(TotpUrlError::SecretSize(size)) => {
+                eprintln!("Warning: secret '{}' has an invalid size of {} bytes.", secret.0, size)
+            }
             Err(_) => eprintln!("Warning: secret '{}' could not be used.", secret.0),
         };
     }
