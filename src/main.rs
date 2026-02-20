@@ -3,6 +3,7 @@ use std::env;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{io, thread};
 use totp_rs::{Algorithm, Secret, TotpUrlError, TOTP};
+use colored::*;
 
 fn main() {
     let title_screen_art = r"___  __  ___  __      __   ___       ___  __       ___  __   __
@@ -29,9 +30,11 @@ fn main() {
         .read_line(&mut secret_str)
         .expect("An error occurred while taking input");
 
+    let mut errors: Vec<String> = Vec::new();
+
     let secret_str = secret_str.trim().replace(" ", "").to_uppercase();
     let mut secrets: Vec<(String, Vec<u8>)> = Vec::new();
-    if !secret_str.eq_ignore_ascii_case("n") {
+    if secret_str != "N" {
         secrets.push((
             String::from("Untitled"),
             Secret::Encoded(secret_str)
@@ -51,10 +54,10 @@ fn main() {
                 secrets.push((String::from(var.0.strip_prefix("TOTP_").unwrap()), secret))
             }
             Err(_) => {
-                eprintln!(
-                    "Warning: environment variable '{}' was ignored because it does not contain a valid TOTP secret.",
+                errors.push(format!(
+                    "{} environment variable '{}' was ignored because it does not contain a valid TOTP secret.", "Warning:".yellow(),
                     var.0
-                );
+                ));
             }
         }
     }
@@ -65,16 +68,14 @@ fn main() {
         let totp = TOTP::new(Algorithm::SHA1, 6, 1, 30, secret.1);
         match totp {
             Ok(totp) => totps.push((secret.0, totp)),
-            Err(TotpUrlError::SecretSize(size)) => {
-                eprintln!("Warning: secret '{}' has an invalid size of {} bytes.", secret.0, size)
-            }
-            Err(_) => eprintln!("Warning: secret '{}' could not be used.", secret.0),
+            Err(TotpUrlError::SecretSize(size)) => errors.push(format!("{} secret '{}' has an invalid size of {} bits. (It must be at least 26 characters)", "Warning:".yellow(), secret.0, size)),
+            Err(_) =>errors.push(format!("{} secret '{}' could not be used.","Warning:".yellow(), secret.0))
         };
     }
 
     if totps.is_empty() {
-        println!(
-            "No secrets were found/could be used, exiting. Please make sure the env variables begin with 'TOTP_'"
+        println!("{}",
+            "No secrets were found/could be used, exiting. Please make sure the env variables begin with 'TOTP_'".red()
         );
         return;
     }
@@ -94,6 +95,14 @@ fn main() {
                     .as_secs()
                     % 30)
             );
+        }
+        if !errors.is_empty() {
+            println!();
+            println!("{}", "------------------------".red());
+            println!("{}", "Errors:".red());
+            for error in &errors {
+                println!("{}", error);
+            }
         }
         thread::sleep(Duration::from_secs(1));
     }
