@@ -79,7 +79,7 @@ fn main() {
 
     if totps.is_empty() {
         println!("{}",
-            "No secrets were found/could be used, exiting. Please make sure the env variables begin with 'TOTP_'".red()
+                 "No secrets were found/could be used, exiting. Please make sure the env variables begin with 'TOTP_'".red()
         );
         if !errors.is_empty() {
             println!();
@@ -91,22 +91,27 @@ fn main() {
         }
         return;
     }
+    let mut time_left_str: String;
     loop {
         clearscreen::clear().expect("failed to clear screen");
         println!("{}", title_screen_art);
         println!("Missing a token? Check your environment variables to see if it was set properly");
         for totp in &totps {
             let token = totp.1.generate_current().unwrap();
-            println!(
-                "{}: {} - {} seconds",
-                totp.0,
-                token,
-                30 - (SystemTime::now()
+            let time_left = 30
+                - (SystemTime::now()
                     .duration_since(UNIX_EPOCH)
                     .unwrap()
                     .as_secs()
-                    % 30)
-            );
+                    % 30);
+            if time_left <= 30 && time_left > 20 {
+                time_left_str = format!("{} {}", time_left.to_string().green(), "seconds".green())
+            } else if time_left <= 20 && time_left > 10 {
+                time_left_str = format!("{} {}", time_left.to_string().yellow(), "seconds".yellow())
+            } else {
+                time_left_str = format!("{} {}", time_left.to_string().red(), "seconds".red())
+            }
+            println!("{}: {} - {}", totp.0, token, time_left_str);
         }
         if !errors.is_empty() {
             println!();
