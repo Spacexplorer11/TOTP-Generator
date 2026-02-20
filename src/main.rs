@@ -1,9 +1,9 @@
+use colored::Colorize;
 use dotenvy::dotenv;
 use std::env;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{io, thread};
-use totp_rs::{Algorithm, Secret, TotpUrlError, TOTP};
-use colored::*;
+use totp_rs::{Algorithm, Secret, TOTP, TotpUrlError};
 
 fn main() {
     let title_screen_art = r"___  __  ___  __      __   ___       ___  __       ___  __   __
@@ -11,7 +11,10 @@ fn main() {
  |  \__/  |  |       \__> |___ | \| |___ |  \ /~~\  |  \__/ |  \ ";
     println!("{}", title_screen_art);
     if !dotenv().is_ok() {
-        println!("Warning: .env file could not be loaded, saved secrets will not be used.");
+        println!(
+            "{} .env file could not be loaded, saved secrets will not be used.",
+            "Warning:".yellow()
+        );
     } else {
         dotenv().ok();
     }
@@ -19,7 +22,9 @@ fn main() {
         "If you wish to use multiple tokens, please read the README here: https://github.com/Spacexplorer11/TOTP-Generator/blob/main/README.md"
     );
     println!(
-        "Warning: This program clears your terminal after you press Enter. Please ensure you have no information you may need later in this terminal session."
+        "{} This program {} after you press Enter. Please ensure you have no information you may need later in this terminal session.",
+        "Warning:".yellow(),
+        "clears your terminal".red()
     );
     println!("To abort/quit use CTRL+C");
     println!("If you wish to only use stored / loaded secrets, please enter 'N'");
@@ -34,7 +39,8 @@ fn main() {
 
     let secret_str = secret_str.trim().replace(" ", "").to_uppercase();
     let mut secrets: Vec<(String, Vec<u8>)> = Vec::new();
-    if secret_str != "N" { // secret_str is made uppercase 2 lines above so this works
+    if secret_str != "N" {
+        // secret_str is made uppercase 2 lines above so this works
         secrets.push((
             String::from("Untitled"),
             Secret::Encoded(secret_str)
