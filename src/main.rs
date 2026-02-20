@@ -34,7 +34,7 @@ fn main() {
 
     let secret_str = secret_str.trim().replace(" ", "").to_uppercase();
     let mut secrets: Vec<(String, Vec<u8>)> = Vec::new();
-    if secret_str != "N" {
+    if secret_str != "N" { // secret_str is made uppercase 2 lines above so this works
         secrets.push((
             String::from("Untitled"),
             Secret::Encoded(secret_str)
@@ -55,7 +55,7 @@ fn main() {
             }
             Err(_) => {
                 errors.push(format!(
-                    "{} environment variable '{}' was ignored because it does not contain a valid TOTP secret.", "Warning:".yellow(),
+                    "{} environment variable '{}' was ignored because it does not contain a valid TOTP secret.", "Error:".red(),
                     var.0
                 ));
             }
@@ -68,8 +68,8 @@ fn main() {
         let totp = TOTP::new(Algorithm::SHA1, 6, 1, 30, secret.1);
         match totp {
             Ok(totp) => totps.push((secret.0, totp)),
-            Err(TotpUrlError::SecretSize(size)) => errors.push(format!("{} secret '{}' has an invalid size of {} bits. (It must be at least 26 characters)", "Warning:".yellow(), secret.0, size)),
-            Err(_) =>errors.push(format!("{} secret '{}' could not be used.","Warning:".yellow(), secret.0))
+            Err(TotpUrlError::SecretSize(size)) => errors.push(format!("{} secret '{}' has an invalid size of {} bits. (It must be at least 26 Base32 characters)", "Error:".red(), secret.0, size)),
+            Err(_) =>errors.push(format!("{} secret '{}' could not be used.","Error:".red(), secret.0))
         };
     }
 
