@@ -7,3 +7,4 @@ edition = "2024"
 totp-rs = { version = "5.7.0"}
 clearscreen = "4.0.3"
 dotenvy = "0.15.7"
+colored = "3.1.1"
