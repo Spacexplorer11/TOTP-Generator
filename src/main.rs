@@ -10,13 +10,11 @@ fn main() {
  |  /  \  |  |__)    / _` |__  |\ | |__  |__)  /\   |  /  \ |__)
  |  \__/  |  |       \__> |___ | \| |___ |  \ /~~\  |  \__/ |  \ ";
     println!("{}", title_screen_art);
-    if !dotenv().is_ok() {
+    if dotenv().is_err() {
         println!(
             "{} .env file could not be loaded, saved secrets will not be used.",
             "Warning:".yellow()
         );
-    } else {
-        dotenv().ok();
     }
     println!(
         "If you wish to use multiple tokens, please read the README here: https://github.com/Spacexplorer11/TOTP-Generator/blob/main/README.md"
