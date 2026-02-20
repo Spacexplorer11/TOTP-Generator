@@ -75,7 +75,7 @@ fn main() {
         match totp {
             Ok(totp) => totps.push((secret.0, totp)),
             Err(TotpUrlError::SecretSize(size)) => errors.push(format!("{} secret '{}' has an invalid size of {} bits. (It must be at least 26 Base32 characters)", "Error:".red(), secret.0, size)),
-            Err(_) =>errors.push(format!("{} secret '{}' could not be used.","Error:".red(), secret.0))
+            Err(_) => errors.push(format!("{} secret '{}' could not be used.","Error:".red(), secret.0))
         };
     }
 
@@ -83,6 +83,14 @@ fn main() {
         println!("{}",
             "No secrets were found/could be used, exiting. Please make sure the env variables begin with 'TOTP_'".red()
         );
+        if !errors.is_empty() {
+            println!();
+            println!("{}", "------------------------".red());
+            println!("{}", "Errors:".red());
+            for error in &errors {
+                println!("{}", error);
+            }
+        }
         return;
     }
     loop {
